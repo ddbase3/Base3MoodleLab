@@ -1,0 +1,11 @@
+{
+  "manifestVersion": 1,
+  "name": "Base3MoodleLab",
+  "namespace": "Base3MoodleLab",
+  "version": "0.1.0",
+  "description": "Project composition and administration tabs for BASE3 in Moodle.",
+  "dependencies": {
+    "Base3Framework": ">=4.10.0",
+    "Base3Moodle": ">=0.1.0"
+  }
+}
