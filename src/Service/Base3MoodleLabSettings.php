@@ -2,6 +2,7 @@
 
 namespace Base3MoodleLab\Service;
 
+use Base3\LinkTarget\Api\ILinkTargetService;
 use Base3\Translation\Api\ITranslation;
 use Base3Moodle\Api\IBase3MoodleSettings;
 
@@ -12,7 +13,10 @@ use Base3Moodle\Api\IBase3MoodleSettings;
  */
 final class Base3MoodleLabSettings implements IBase3MoodleSettings {
 
-	public function __construct(private readonly ITranslation $translation) {}
+	public function __construct(
+		private readonly ITranslation $translation,
+		private readonly ILinkTargetService $linkTargetService
+	) {}
 
 	public function getAdministrationConfig(): array {
 		return [
@@ -109,6 +113,9 @@ final class Base3MoodleLabSettings implements IBase3MoodleSettings {
 				['messagedeliverylogadmindisplay', 'Deliveries'],
 				['messagetransportadmindisplay', 'Transports'],
 				['messagehubdemoadmindisplay', 'Demo']
+			]),
+			$this->tab('games', 'Games', [
+				['pulsecoredisplay', 'PulseCore']
 			])
 		];
 	}
@@ -131,10 +138,12 @@ final class Base3MoodleLabSettings implements IBase3MoodleSettings {
 	}
 
 	private function chatbotConfig(): array {
-		$baseUrl = (new \moodle_url('/local/base3/filemanager.php', ['sesskey' => sesskey()]))->out(false);
 		$endpoints = [];
 		foreach (['list', 'stat', 'mkdir', 'delete', 'rmdir', 'copy', 'move', 'uploadStart', 'uploadChunk', 'uploadStatus', 'uploadFinish', 'uploadAbort', 'download'] as $action) {
-			$endpoints[$action] = (new \moodle_url($baseUrl, ['fm_action' => $action]))->out(false);
+			$endpoints[$action] = $this->linkTargetService->getLink(
+				['name' => 'base3moodlefilemanageroutput', 'out' => 'json'],
+				['fm_action' => $action]
+			);
 		}
 		return [
 			'group' => 'chatbot',

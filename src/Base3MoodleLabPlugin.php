@@ -9,6 +9,7 @@ use Base3\Api\IContainer;
 use Base3\Api\IModuleRegistry;
 use Base3\Api\IPlugin;
 use Base3\Database\Api\IDatabase;
+use Base3\LinkTarget\Api\ILinkTargetService;
 use Base3\Migration\Api\IMigrationRunner;
 use Base3\Migration\Database\DatabaseMigrationRunner;
 use Base3\Session\Api\ISession;
@@ -31,7 +32,7 @@ final class Base3MoodleLabPlugin implements IPlugin, IBase {
 			->set(ISettingsStore::class, fn($c) => new DatabaseSettingsStore($c->get(IDatabase::class)), IContainer::SHARED)
 			->set(IStateStore::class, fn($c) => new DatabaseStateStore($c->get(IDatabase::class)), IContainer::SHARED)
 			->set(IMigrationRunner::class, fn($c) => new DatabaseMigrationRunner($c->get(IClassMap::class), $c->get(IDatabase::class)), IContainer::SHARED)
-			->set(IBase3MoodleSettings::class, fn($c) => new Base3MoodleLabSettings($c->get(ITranslation::class)), IContainer::SHARED);
+			->set(IBase3MoodleSettings::class, fn($c) => new Base3MoodleLabSettings($c->get(ITranslation::class), $c->get(ILinkTargetService::class)), IContainer::SHARED);
 
 		// Optional MissionBay composition is a deliberate project-level decision.
 		if ($this->container->get(IModuleRegistry::class)->getModulePath('MissionBay') !== null) {
