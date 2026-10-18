@@ -17,3 +17,28 @@ installed modules, remote AI services and backups need separate assessment.
 Deletion of chatbot files is performed by the existing FileManager/storage
 services, not by this project configuration module. Administrator and
 client-side accessibility behavior should be verified in the deployment.
+
+## Shared global chatbot launcher (18 October 2026)
+
+The project module now exposes the `base3moodleglobalchatbotlauncheroutput`
+BASE3 `IOutput`. It renders public configuration attributes for the common
+ClientStack launcher, including the existing `chatbot/default` identity,
+window flags, the standard BASE3 chatbot display URL, and language labels.
+No new service endpoint, file storage backend, AI provider, conversation store
+or recipient is introduced.
+
+Launcher flags are read from the existing database-backed BASE3 `SettingsStore`
+as `global-chatbot-launcher/default`. A one-time import of previously saved
+native Moodle window flags runs only if this central dataset is absent.
+The Moodle native visibility flag remains separate. ClientStack can store
+mode/size choices in `localStorage` and open-state in `sessionStorage` as
+configured. Actual retention, browser configuration and deployment-level
+notices must be assessed by the Moodle operator. ClientStack provides the
+interaction and keyboard controls; verify theme integration for accessibility.
+
+## Launcher button appearance (18 October 2026)
+
+The Moodle launcher no longer passes the site-local chatbot icon to
+ClientStack. Its standard labeled button is rendered instead. This is
+a presentation-only change; identity, access controls, browser storage,
+request destinations and retention remain unchanged.

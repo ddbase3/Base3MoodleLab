@@ -13,6 +13,9 @@ use Base3Moodle\Api\IBase3MoodleSettings;
  */
 final class Base3MoodleLabSettings implements IBase3MoodleSettings {
 
+	public const GLOBAL_CHATBOT_GROUP = 'chatbot';
+	public const GLOBAL_CHATBOT_NAME = 'default';
+
 	public function __construct(
 		private readonly ITranslation $translation,
 		private readonly ILinkTargetService $linkTargetService
@@ -31,6 +34,10 @@ final class Base3MoodleLabSettings implements IBase3MoodleSettings {
 			]),
 			$this->tab('chatbot', 'Chatbot', [
 				['chatbotconfigdisplay', 'Configuration', ['data' => $this->chatbotConfig()]],
+				['globalchatbotlauncherconfigdisplay', 'Launcher', ['data' => [
+					'title' => $this->t('global_chatbot_launcher_title', 'Global Chatbot Launcher'),
+					'description' => $this->t('global_chatbot_launcher_description', 'Window modes, resizing and reopening behaviour for the global chatbot.')
+				]]],
 				['chatbotextensionsconfigdisplay', 'Extensions']
 			]),
 			$this->tab('provider', 'Provider', [
@@ -146,8 +153,8 @@ final class Base3MoodleLabSettings implements IBase3MoodleSettings {
 			);
 		}
 		return [
-			'group' => 'chatbot',
-			'name' => 'default',
+			'group' => self::GLOBAL_CHATBOT_GROUP,
+			'name' => self::GLOBAL_CHATBOT_NAME,
 			'title' => $this->t('chatbot_config_title', 'Chatbot Configuration'),
 			'description' => $this->t('moodle_chatbot_config_description', 'Global configuration for the Moodle chatbot.'),
 			'submit_label' => $this->t('save', 'Save'),
