@@ -32,7 +32,14 @@ namespace Base3\Translation\Api {
 }
 
 namespace Base3Moodle\Api {
-	interface IBase3MoodleSettings { public function getAdministrationConfig(): array; }
+	interface IBase3MoodleSettings {
+		public function getAdministrationConfig(): array;
+		public function getVisibleAdministrationConfig(): array;
+	}
+}
+
+namespace Base3\Usermanager\Api {
+	interface IUsermanager { public function getGroups(); }
 }
 
 namespace {
@@ -40,6 +47,7 @@ namespace {
 	use Base3\LinkTarget\Api\ILinkTargetService;
 	use Base3\Settings\Api\ISettingsStore;
 	use Base3\Translation\Api\ITranslation;
+	use Base3\Usermanager\Api\IUsermanager;
 	use Base3MoodleLab\Output\Base3MoodleGlobalChatbotLauncherOutput;
 	use Base3MoodleLab\Service\Base3MoodleLabSettings;
 	use ClientStack\GlobalChatbotLauncher\GlobalChatbotLauncherSettings;
@@ -158,9 +166,17 @@ namespace {
 	verify(str_contains($precedence, 'data-mode-docked-enabled="0"')
 		&& $store->saves === 2, 'central BASE3 settings take precedence over old Moodle settings');
 
-	$configuration = (new Base3MoodleLabSettings($translation, $link))->getAdministrationConfig();
+	$users = new class implements IUsermanager {
+		public function getGroups() { return []; }
+	};
+	$lab = new Base3MoodleLabSettings($translation, $link, $users);
+	$configuration = $lab->getAdministrationConfig();
 	$tabs = [];
 	foreach ($configuration as $tab) if (($tab['name'] ?? '') === 'chatbot') $tabs = $tab['displays'];
+	$reduced = $lab->getVisibleAdministrationConfig();
+	verify(array_column($reduced, 'name') === ['base3', 'games'], 'non-developer sees reduced administration and games');
+	verify(array_column($reduced[0]['displays'], 'name') === ['authorizationadministrationdisplay'],
+		'Group and feature administration are not visible without development membership');
 	verify(array_column($tabs, 'name') === [
 		'chatbotconfigdisplay', 'globalchatbotlauncherconfigdisplay', 'chatbotextensionsconfigdisplay'
 	], 'BASE3 chatbot tabs are Configuration / Launcher / Extensions');

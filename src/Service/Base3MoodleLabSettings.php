@@ -4,6 +4,7 @@ namespace Base3MoodleLab\Service;
 
 use Base3\LinkTarget\Api\ILinkTargetService;
 use Base3\Translation\Api\ITranslation;
+use Base3\Usermanager\Api\IUsermanager;
 use Base3Moodle\Api\IBase3MoodleSettings;
 
 /**
@@ -18,7 +19,8 @@ final class Base3MoodleLabSettings implements IBase3MoodleSettings {
 
 	public function __construct(
 		private readonly ITranslation $translation,
-		private readonly ILinkTargetService $linkTargetService
+		private readonly ILinkTargetService $linkTargetService,
+		private readonly IUsermanager $usermanager
 	) {}
 
 	public function getAdministrationConfig(): array {
@@ -29,6 +31,9 @@ final class Base3MoodleLabSettings implements IBase3MoodleSettings {
 				['configurationadmindisplay', 'Configuration'],
 				['usermanagerdebugdisplay', 'User Manager'],
 				['statestoreadmindisplay', 'State Store'],
+				['authorizationadministrationdisplay', 'Permissions', ['params' => ['resource_type' => 'context_id']]],
+				['moodlegroupadmindisplay', 'Groups'],
+				['moodlefeatureadmindisplay', 'Features'],
 				['jobsadmindisplay', 'Jobs'],
 				['databaseworkbenchdisplay', 'Database workbench']
 			]),
@@ -127,6 +132,29 @@ final class Base3MoodleLabSettings implements IBase3MoodleSettings {
 		];
 	}
 
+	/**
+	 * Derives the visible navigation from the complete administration catalog. Only
+	 * the effective BASE3 development group unlocks the full tab set; the old native
+	 * Developer role and the Moodle site admin status are never implicit grants.
+	 */
+	public function getVisibleAdministrationConfig(): array {
+		foreach ($this->usermanager->getGroups() as $group) {
+			if ((string)$group->name === 'development') return $this->getAdministrationConfig();
+		}
+		$result = [];
+		foreach ($this->getAdministrationConfig() as $tab) {
+			if ($tab['name'] === 'base3') {
+				$tab['displays'] = array_values(array_filter($tab['displays'], static fn(array $display): bool =>
+					($display['name'] ?? '') === 'authorizationadministrationdisplay'
+				));
+				$result[] = $tab;
+			} elseif ($tab['name'] === 'games') {
+				// Games remain discoverable; their own server-side feature controls decide access.
+				$result[] = $tab;
+			}
+		}
+		return $result;
+	}
 	/** @param array<int,array{0:string,1:string,2?:array<string,mixed>}> $entries */
 	private function tab(string $name, string $label, array $entries): array {
 		$displays = [];
@@ -139,6 +167,7 @@ final class Base3MoodleLabSettings implements IBase3MoodleSettings {
 		}
 		return [
 			'name' => $name,
+			'administrative' => $name !== 'games',
 			'label' => $this->t('base3_admin_tab_' . $name, $label),
 			'displays' => $displays
 		];

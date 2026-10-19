@@ -18,6 +18,7 @@ use Base3\Settings\Database\DatabaseSettingsStore;
 use Base3\State\Api\IStateStore;
 use Base3\State\Database\DatabaseStateStore;
 use Base3\Translation\Api\ITranslation;
+use Base3\Usermanager\Api\IUsermanager;
 use Base3Moodle\Api\IBase3MoodleSettings;
 use Base3MoodleLab\Service\Base3MoodleLabSettings;
 
@@ -32,7 +33,7 @@ final class Base3MoodleLabPlugin implements IPlugin, IBase {
 			->set(ISettingsStore::class, fn($c) => new DatabaseSettingsStore($c->get(IDatabase::class)), IContainer::SHARED)
 			->set(IStateStore::class, fn($c) => new DatabaseStateStore($c->get(IDatabase::class)), IContainer::SHARED)
 			->set(IMigrationRunner::class, fn($c) => new DatabaseMigrationRunner($c->get(IClassMap::class), $c->get(IDatabase::class)), IContainer::SHARED)
-			->set(IBase3MoodleSettings::class, fn($c) => new Base3MoodleLabSettings($c->get(ITranslation::class), $c->get(ILinkTargetService::class)), IContainer::SHARED);
+			->set(IBase3MoodleSettings::class, fn($c) => new Base3MoodleLabSettings($c->get(ITranslation::class), $c->get(ILinkTargetService::class), $c->get(IUsermanager::class)), IContainer::SHARED);
 
 		// Optional MissionBay composition is a deliberate project-level decision.
 		if ($this->container->get(IModuleRegistry::class)->getModulePath('MissionBay') !== null) {
