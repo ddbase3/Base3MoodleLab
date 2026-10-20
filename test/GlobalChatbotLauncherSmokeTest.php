@@ -173,6 +173,14 @@ namespace {
 	$configuration = $lab->getAdministrationConfig();
 	$tabs = [];
 	foreach ($configuration as $tab) if (($tab['name'] ?? '') === 'chatbot') $tabs = $tab['displays'];
+	$base3Displays = [];
+	foreach ($configuration as $tab) if (($tab['name'] ?? '') === 'base3') $base3Displays = array_column($tab['displays'], 'name');
+	verify(in_array('authorizationgroupsdisplay', $base3Displays, true)
+		&& in_array('authorizationfeaturesdisplay', $base3Displays, true)
+		&& in_array('authorizationadministrationdisplay', $base3Displays, true)
+		&& !in_array('moodlegroupadmindisplay', $base3Displays, true)
+		&& !in_array('moodlefeatureadmindisplay', $base3Displays, true),
+		'BASE3 administration uses exclusively shared ClientStack authorization displays');
 	$reduced = $lab->getVisibleAdministrationConfig();
 	verify(array_column($reduced, 'name') === ['base3', 'games'], 'non-developer sees reduced administration and games');
 	verify(array_column($reduced[0]['displays'], 'name') === ['authorizationadministrationdisplay'],

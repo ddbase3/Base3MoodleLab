@@ -65,3 +65,15 @@ recipient or cross-border transfer is introduced by the project composition.
 Retention, deletion of backups, native audit trails and user notifications
 remain dependent on the actual Moodle deployment and its configured services.
 The site owner must assess them in its deployment privacy documentation.
+
+## Common authorization administration displays (20 October 2026)
+
+The BASE3 Groups and Features entries in `Base3MoodleLabSettings` now point
+to the unmodified ClientStack `authorizationgroupsdisplay` and
+`authorizationfeaturesdisplay`. The project plugin does not read or persist
+additional user or group information; the Moodle-owned
+`MoodleAudienceAdministrationService` in `Base3Moodle` retains authorization
+and persistence responsibility. See `../Base3Moodle/PRIVACY.md` for the
+existing data categories, retention boundaries, and fallback group behavior.
+No new recipients or cross-border transfers are introduced by this tab change.
+Deployment-level privacy and WCAG 2.2 AA validation is still required.

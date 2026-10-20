@@ -52,6 +52,9 @@ administration endpoints, and PulseCore controls its own availability through
 
 The shared `authorizationadministrationdisplay` is a read-only inspector of
 native `CAP_ALLOW` role-capability assignments by Moodle context ID; Moodle
-retains role administration. New editable BASE3 groups and feature audiences
-are in `Base3Moodle`, using the existing Moodle-backed `ISettingsStore`.
+retains role administration. **Groups** and **Features** use the exact common
+ClientStack displays `authorizationgroupsdisplay` and
+`authorizationfeaturesdisplay`, not Moodle-specific displays or templates.
+`Base3Moodle` implements their UiFoundation data/administration contract using
+the existing Moodle-backed `ISettingsStore` and native Moodle authorization.
 See `../Base3Moodle/README.md` and `PRIVACY.md`.

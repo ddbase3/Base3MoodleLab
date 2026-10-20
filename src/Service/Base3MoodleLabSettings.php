@@ -32,8 +32,8 @@ final class Base3MoodleLabSettings implements IBase3MoodleSettings {
 				['usermanagerdebugdisplay', 'User Manager'],
 				['statestoreadmindisplay', 'State Store'],
 				['authorizationadministrationdisplay', 'Permissions', ['params' => ['resource_type' => 'context_id']]],
-				['moodlegroupadmindisplay', 'Groups'],
-				['moodlefeatureadmindisplay', 'Features'],
+				['authorizationgroupsdisplay', 'Groups'],
+				['authorizationfeaturesdisplay', 'Features'],
 				['jobsadmindisplay', 'Jobs'],
 				['databaseworkbenchdisplay', 'Database workbench']
 			]),
