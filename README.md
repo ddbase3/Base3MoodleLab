@@ -23,8 +23,12 @@ renders its standard blue pill button with a text label, as on WordPress.
 
 On first render, any stored legacy Moodle launcher window flags are imported
 into the canonical `global-chatbot-launcher/default` dataset, unless that
-BASE3 dataset already exists. The Moodle site configuration owns launcher
-visibility only. Content chatbot records are independent.
+BASE3 dataset already exists. `GlobalChatbotLauncherFeature` is the single
+feature definition for the floating launcher. Its default audience is the
+BASE3 `authenticated` group; operators can change it under BASE3 > Features.
+The former native Moodle visibility settings are not read anymore. Content
+chatbots with different identities remain independent. The existing Moodle
+AJAX transport enforces the same feature when loading `chatbot/default`.
 
 Run `php modules/Base3MoodleLab/test/GlobalChatbotLauncherSmokeTest.php` after
 updating ClientStack to check module integration and settings. See the root

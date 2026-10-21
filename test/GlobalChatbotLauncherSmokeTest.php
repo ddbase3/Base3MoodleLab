@@ -9,6 +9,44 @@ namespace Base3\Api {
 	interface IAssetResolver { public function resolve(string $path): string; }
 }
 
+namespace Base3\Usermanager {
+	final class Permission {
+		public function __construct(public readonly string $scope, public readonly string $permission) {}
+		public static function for(string $scope, string $permission): self { return new self($scope, $permission); }
+	}
+}
+
+namespace Base3\Authorization\Dto {
+	final class AuthorizationRequest {
+		public function __construct(public readonly string $authority, public readonly \Base3\Usermanager\Permission $permission) {}
+	}
+	final class AuthorizationDecision {
+		public function __construct(private readonly bool $allowed) {}
+		public function isAllowed(): bool { return $this->allowed; }
+	}
+}
+
+namespace Base3\Authorization\Api {
+	interface IFeature extends \Base3\Api\IBase {
+		public function getLabel(): string;
+		public function getDescription(): string;
+		public function getPermissions(): array;
+		public function getDefaultAudience(): array;
+	}
+	interface IAuthorizationService {
+		public function getDefaultAuthority(): string;
+		public function decide(\Base3\Authorization\Dto\AuthorizationRequest $request): \Base3\Authorization\Dto\AuthorizationDecision;
+		public function decideMany(array $requests): array;
+	}
+}
+
+namespace local_base3 {
+	final class Runtime {
+		public static function boot(): void {}
+		public static function container(): \TestContainer { return new \TestContainer(); }
+	}
+}
+
 namespace Base3\LinkTarget\Api {
 	interface ILinkTargetService { public function getLink(array $target, array $params = []): string; }
 }
@@ -43,15 +81,42 @@ namespace Base3\Usermanager\Api {
 }
 
 namespace {
+	use Base3\Authorization\Api\IAuthorizationService;
+	use Base3\Authorization\Dto\AuthorizationDecision;
+	use Base3\Authorization\Dto\AuthorizationRequest;
 	use Base3\Api\IAssetResolver;
 	use Base3\LinkTarget\Api\ILinkTargetService;
 	use Base3\Settings\Api\ISettingsStore;
 	use Base3\Translation\Api\ITranslation;
 	use Base3\Usermanager\Api\IUsermanager;
+	use Base3MoodleLab\Feature\GlobalChatbotLauncherFeature;
 	use Base3MoodleLab\Output\Base3MoodleGlobalChatbotLauncherOutput;
 	use Base3MoodleLab\Service\Base3MoodleLabSettings;
 	use ClientStack\GlobalChatbotLauncher\GlobalChatbotLauncherSettings;
 	use local_base3\ChatbotBubble;
+
+	final class TestContainer {
+		public function get(string $id): object {
+			if ($id !== IAuthorizationService::class) throw new \RuntimeException('Unexpected service: ' . $id);
+			return $GLOBALS['authorization'];
+		}
+	}
+
+	final class TestAuthorization implements IAuthorizationService {
+		public int $decisions = 0;
+		public function getDefaultAuthority(): string { return 'moodle'; }
+		public function decide(AuthorizationRequest $request): AuthorizationDecision {
+			$this->decisions++;
+			verify($request->authority === 'moodle'
+				&& $request->permission->scope === 'feature'
+				&& $request->permission->permission === GlobalChatbotLauncherFeature::getName(),
+				'floating launcher uses only its declared BASE3 feature permission');
+			return new AuthorizationDecision((bool)($GLOBALS['featureAllowed'] ?? false));
+		}
+		public function decideMany(array $requests): array {
+			return array_map(fn(AuthorizationRequest $request): AuthorizationDecision => $this->decide($request), $requests);
+		}
+	}
 
 	$nativeSettings = [];
 	function get_config(string $component, string $name): mixed {
@@ -90,6 +155,7 @@ namespace {
 	if (!is_file($clientStackSettings)) throw new \RuntimeException('Pull ClientStack before running the Moodle launcher smoke test.');
 	require_once $clientStackSettings;
 	require_once __DIR__ . '/../src/Service/Base3MoodleLabSettings.php';
+	require_once __DIR__ . '/../src/Feature/GlobalChatbotLauncherFeature.php';
 	require_once __DIR__ . '/../src/Output/Base3MoodleGlobalChatbotLauncherOutput.php';
 	require_once __DIR__ . '/../../../moodle/local/base3/classes/ChatbotBubble.php';
 
@@ -111,25 +177,29 @@ namespace {
 		}
 	};
 
+	$feature = new GlobalChatbotLauncherFeature($translation);
+	verify($feature::getName() === 'globalchatbotlauncherfeature'
+		&& $feature->getDefaultAudience() === ['group' => 'authenticated']
+		&& count($feature->getPermissions()) === 1,
+		'new launcher feature is discoverable with authenticated default audience');
+	$authorization = new TestAuthorization();
+	$GLOBALS['authorization'] = $authorization;
 	$nativeSettings['local_base3'] = [
-		'chatbotbubble_enabled' => '1', 'chatbotbubble_visibility' => 'authenticated',
+		'chatbotbubble_enabled' => '0', 'chatbotbubble_visibility' => 'administrators',
 		'chatbotbubble_modal' => '1', 'chatbotbubble_docked' => '1',
 		'chatbotbubble_resizeoverlay' => '1', 'chatbotbubble_reopendocked' => '1'
 	];
-	$GLOBALS['loggedIn'] = true;
-	$GLOBALS['guestUser'] = false;
-	verify(ChatbotBubble::visible(), 'configured authenticated users can see global launcher');
-	$GLOBALS['guestUser'] = true;
-	verify(!ChatbotBubble::visible(), 'guests cannot see authenticated-only launcher');
-	$GLOBALS['guestUser'] = false;
-	$nativeSettings['local_base3']['chatbotbubble_visibility'] = 'administrators';
-	verify(!ChatbotBubble::visible(), 'non-admin users cannot see admin-only launcher');
-	$GLOBALS['siteAdmin'] = true;
-	verify(ChatbotBubble::visible(), 'Moodle administrators can see admin-only launcher');
-	$nativeSettings['local_base3']['chatbotbubble_visibility'] = 'authenticated';
+	$GLOBALS['featureAllowed'] = false;
+	verify(!ChatbotBubble::visible(), 'denied feature hides the global launcher');
+	$GLOBALS['featureAllowed'] = true;
+	verify(ChatbotBubble::visible(), 'allowed feature shows launcher despite obsolete Moodle visibility flags');
 
 	$store = new TestSettingsStore();
-	$output = new Base3MoodleGlobalChatbotLauncherOutput($link, $resolver, $translation, $store);
+	$output = new Base3MoodleGlobalChatbotLauncherOutput($link, $resolver, $translation, $store, $authorization);
+	$GLOBALS['featureAllowed'] = false;
+	verify($output->getOutput('html') === '' && $store->saves === 0,
+		'direct output invocation also refuses rendering for a denied user');
+	$GLOBALS['featureAllowed'] = true;
 	verify(Base3MoodleGlobalChatbotLauncherOutput::getName() === strtolower((new \ReflectionClass($output))->getShortName()), 'BASE3 classmap name is lowercase class name');
 	$html = $output->getOutput('html');
 	verify(str_contains($html, 'data-base3-global-chatbot-launcher')
@@ -192,7 +262,9 @@ namespace {
 		&& ($tabs[0]['data']['name'] ?? '') === 'default'
 		&& count($tabs[0]['data']['resources']['endpoints'] ?? []) === 13, 'original chatbot config and all FileManager actions are unchanged');
 	verify(str_contains(file_get_contents(__DIR__ . '/../../../moodle/local/base3/classes/hook_callbacks.php'), "Runtime::renderEmbedded('base3moodleglobalchatbotlauncheroutput')"), 'native footer hook calls discoverable launcher through existing BASE3 runtime');
-	verify(!str_contains(file_get_contents(__DIR__ . '/../../../moodle/local/base3/settings.php'), 'chatbotbubble_resizeoverlay'), 'native Moodle settings now manage visibility only');
+	verify(!str_contains(file_get_contents(__DIR__ . '/../../../moodle/local/base3/settings.php'), 'chatbotbubble_visibility')
+		&& !str_contains(file_get_contents(__DIR__ . '/../../../moodle/local/base3/settings.php'), 'chatbotbubble_enabled'),
+		'native Moodle launcher visibility settings have been removed');
 
-	echo "GlobalChatbotLauncherSmokeTest OK: shared ClientStack module, Moodle visibility, migration, docking, admin tabs and generic dispatch.\n";
+	echo "GlobalChatbotLauncherSmokeTest OK: shared launcher, feature authorization, settings migration, docking, admin tabs and generic dispatch.\n";
 }

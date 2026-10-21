@@ -30,7 +30,7 @@ or recipient is introduced.
 Launcher flags are read from the existing database-backed BASE3 `SettingsStore`
 as `global-chatbot-launcher/default`. A one-time import of previously saved
 native Moodle window flags runs only if this central dataset is absent.
-The Moodle native visibility flag remains separate. ClientStack can store
+The launcher feature uses the existing Moodle-owned `ISettingsStore` feature audience overrides under `base3_authorization_features/catalog`; the prior native visibility flags are no longer consulted. ClientStack can store
 mode/size choices in `localStorage` and open-state in `sessionStorage` as
 configured. Actual retention, browser configuration and deployment-level
 notices must be assessed by the Moodle operator. ClientStack provides the
@@ -77,3 +77,24 @@ and persistence responsibility. See `../Base3Moodle/PRIVACY.md` for the
 existing data categories, retention boundaries, and fallback group behavior.
 No new recipients or cross-border transfers are introduced by this tab change.
 Deployment-level privacy and WCAG 2.2 AA validation is still required.
+
+## Floating global chatbot feature authorization (21 October 2026)
+
+`GlobalChatbotLauncherFeature` defines the `feature/globalchatbotlauncherfeature`
+permission with a default `authenticated` audience. The existing Moodle
+`IAuthorizationService` evaluates the effective BASE3 group/criterion
+expression for the current user before rendering the floating launcher and
+before loading the fixed `chatbot/default` display over AJAX. The native
+Moodle enabled/visibility settings are unused; previously persisted values
+remain in Moodle configuration until removed by the site operator. No new
+storage, identity mapping, external recipient or retention mechanism is added.
+
+The feature's editable audience may contain personal-data selectors already
+supported by BASE3, including user identities, role assignments and criteria.
+These continue to be processed and stored by the existing Moodle authorization
+configuration. Operators remain responsible for authorization audit, data
+subject requests, backup retention and deployment privacy information.
+Embedded chatbots with different configuration identities are unaffected;
+other requests using `chatbot/default` require the same feature permission.
+A deployed Moodle theme and AJAX-denial scenario still require accessibility
+and usability verification.

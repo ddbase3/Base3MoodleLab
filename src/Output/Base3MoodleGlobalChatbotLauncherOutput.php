@@ -3,10 +3,14 @@
 namespace Base3MoodleLab\Output;
 
 use Base3\Api\IAssetResolver;
+use Base3\Authorization\Api\IAuthorizationService;
+use Base3\Authorization\Dto\AuthorizationRequest;
 use Base3\Api\IOutput;
 use Base3\LinkTarget\Api\ILinkTargetService;
 use Base3\Settings\Api\ISettingsStore;
 use Base3\Translation\Api\ITranslation;
+use Base3\Usermanager\Permission;
+use Base3MoodleLab\Feature\GlobalChatbotLauncherFeature;
 use Base3MoodleLab\Service\Base3MoodleLabSettings;
 use ClientStack\GlobalChatbotLauncher\GlobalChatbotLauncherSettings;
 
@@ -17,7 +21,8 @@ final class Base3MoodleGlobalChatbotLauncherOutput implements IOutput {
 		private readonly ILinkTargetService $linkTargetService,
 		private readonly IAssetResolver $assetResolver,
 		private readonly ITranslation $translation,
-		private readonly ISettingsStore $settingsStore
+		private readonly ISettingsStore $settingsStore,
+		private readonly IAuthorizationService $authorization
 	) {}
 
 	public static function getName(): string {
@@ -26,6 +31,10 @@ final class Base3MoodleGlobalChatbotLauncherOutput implements IOutput {
 
 	public function getOutput(string $out = 'html', bool $final = false): string {
 		if ($out !== 'html') return '';
+		if (!$this->authorization->decide(new AuthorizationRequest(
+			$this->authorization->getDefaultAuthority(),
+			Permission::for('feature', GlobalChatbotLauncherFeature::getName())
+		))->isAllowed()) return '';
 
 		$identity = [
 			'config_group' => Base3MoodleLabSettings::GLOBAL_CHATBOT_GROUP,
