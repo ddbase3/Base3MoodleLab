@@ -10,8 +10,8 @@ use Base3\LinkTarget\Api\ILinkTargetService;
 use Base3\Settings\Api\ISettingsStore;
 use Base3\Translation\Api\ITranslation;
 use Base3\Usermanager\Permission;
-use Base3MoodleLab\Feature\GlobalChatbotLauncherFeature;
-use Base3MoodleLab\Service\Base3MoodleLabSettings;
+use ClientStack\GlobalChatbotLauncher\GlobalChatbotLauncherFeature;
+use Base3MoodleLab\Service\MoodleChatbotConfiguration;
 use ClientStack\GlobalChatbotLauncher\GlobalChatbotLauncherSettings;
 
 /** Moodle-specific HTML for the platform-independent ClientStack launcher. */
@@ -37,8 +37,8 @@ final class Base3MoodleGlobalChatbotLauncherOutput implements IOutput {
 		))->isAllowed()) return '';
 
 		$identity = [
-			'config_group' => Base3MoodleLabSettings::GLOBAL_CHATBOT_GROUP,
-			'config_name' => Base3MoodleLabSettings::GLOBAL_CHATBOT_NAME
+			'config_group' => MoodleChatbotConfiguration::GLOBAL_CHATBOT_GROUP,
+			'config_name' => MoodleChatbotConfiguration::GLOBAL_CHATBOT_NAME
 		];
 		$data = rtrim(strtr(base64_encode(json_encode($identity, JSON_THROW_ON_ERROR)), '+/', '-_'), '=');
 		$url = $this->linkTargetService->getLink(
@@ -49,7 +49,7 @@ final class Base3MoodleGlobalChatbotLauncherOutput implements IOutput {
 		$label = $this->t('global_chatbot_label', 'Chat');
 		$attributes = [
 			'data-ajax-url' => $url,
-			'data-dock-target' => '#page-wrapper',
+			'data-dock-target' => 'body',
 			'data-dock-header-target' => 'nav.navbar.fixed-top',
 			'data-button-label' => $label,
 			'data-header-title' => $this->t('global_chatbot_header_title', $label),

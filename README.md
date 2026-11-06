@@ -23,7 +23,7 @@ renders its standard blue pill button with a text label, as on WordPress.
 
 On first render, any stored legacy Moodle launcher window flags are imported
 into the canonical `global-chatbot-launcher/default` dataset, unless that
-BASE3 dataset already exists. `GlobalChatbotLauncherFeature` is the single
+BASE3 dataset already exists. `ClientStack\GlobalChatbotLauncher\GlobalChatbotLauncherFeature` is the single
 feature definition for the floating launcher. Its default audience is the
 BASE3 `authenticated` group; operators can change it under BASE3 > Features.
 The former native Moodle visibility settings are not read anymore. Content
@@ -39,20 +39,20 @@ instructions and security considerations.
 
 The project now composes the current BASE3 authorization model without defining
 another access evaluator. `Base3Moodle` owns the Moodle adapters for native
-roles, capabilities, and groups; `Base3MoodleLabSettings` owns the final
-administration catalog and its visible navigation. Moodle site administrators
-without a BASE3 `development` membership see reduced navigation: BASE3
-Permissions and Games. The full administration catalog is visible only to
-members of the effective `development` group.
+roles, capabilities, and groups. `Base3MoodleLabPlugin` now contributes
+only the project-owned `MoodleChatbotConfiguration` through the existing
+`chatbotConfigDisplayData` dependency. Generic `ISettingsTab` classes in
+their owning modules define the navigation and visibility. Native Moodle
+`moodle/site:config` is required for the administration and the effective
+BASE3 `development` audience is required for privileged editing.
 
 Configure exact initial Moodle login names (preferred), or verified complete
 email addresses, in `src/Group/MoodleLabDevelopmentGroup.php` BEFORE hiding
 Groups/Features. The code-defined bootstrap members are never removed by the
 host-managed group rules; additional members can be assigned via native
 Moodle role, user or criterion. A BASE3 developer still needs Moodle-native
-site administrator rights to edit Groups and Features. Games are not generic
-administration endpoints, and PulseCore controls its own availability through
-`IAuthorizationService` and `PulseCorePlayFeature`.
+site administrator rights to edit Groups and Features. Games retain their independent feature-based availability through
+their owning BASE3 modules and `IAuthorizationService`.
 
 The shared `authorizationadministrationdisplay` is a read-only inspector of
 native `CAP_ALLOW` role-capability assignments by Moodle context ID; Moodle
@@ -62,3 +62,19 @@ ClientStack displays `authorizationgroupsdisplay` and
 `Base3Moodle` implements their UiFoundation data/administration contract using
 the existing Moodle-backed `ISettingsStore` and native Moodle authorization.
 See `../Base3Moodle/README.md` and `PRIVACY.md`.
+
+## Current project composition and removal (6 November 2026)
+
+The obsolete static settings interface and `Base3MoodleLabSettings` are removed
+with the supplied idempotent source cleanup script. Project configuration
+is defined once in `MoodleChatbotConfiguration` and injected into the generic
+`ChatbotconfigSettingsTab` through the existing classmap constructor argument
+`chatbotConfigDisplayData`. No parallel settings UI or AJAX endpoint exists.
+The duplicate project `GlobalChatbotLauncherFeature` is removed: only the
+ClientStack-owned feature is discoverable. Existing feature audience overrides
+are not migrated, as requested for this development site.
+
+The Moodle footer hook remains the sole global launcher entry point and uses
+the unmodified ClientStack browser assets. Native host capability checks and
+the owner-scoped FileManager route remain in Base3Moodle. See
+`test/GlobalChatbotLauncherSmokeTest.php` for composition verification.

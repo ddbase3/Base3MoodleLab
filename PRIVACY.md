@@ -1,100 +1,64 @@
-# Base3MoodleLab: verified configuration behavior
+# Base3MoodleLab: data processing and boundaries
 
-Source reviewed: `src/Base3MoodleLabPlugin.php` and
-`src/Service/Base3MoodleLabSettings.php` (17 October 2026).
+Source reviewed: `src/Base3MoodleLabPlugin.php`,
+`src/Service/MoodleChatbotConfiguration.php`,
+`src/Output/Base3MoodleGlobalChatbotLauncherOutput.php` and
+`src/Group/MoodleLabDevelopmentGroup.php` (6 November 2026).
 
-This project plugin provides administration display configuration to the
-Moodle BASE3 runtime. The chatbot resource display keeps storage owner
-`chatbot/default` and configures 13 URLs pointing to the generic BASE3
-output `base3moodlefilemanageroutput`. Those URLs carry the current Moodle
-session key and the requested FileManager action. No content is uploaded
-through the settings provider itself; file content is handled by the
-Base3Moodle storage and upload services.
+## Project-owned configuration
 
-The change introduces no new recipients, transfers, storage tables or files,
-and no separate retention process. The deployed Moodle session, logs, other
-installed modules, remote AI services and backups need separate assessment.
-Deletion of chatbot files is performed by the existing FileManager/storage
-services, not by this project configuration module. Administrator and
-client-side accessibility behavior should be verified in the deployment.
+This project plugin binds the existing Moodle database-backed BASE3
+`ISettingsStore` and `IStateStore` and their configured migration runner.
+It provides one lazy `chatbotConfigDisplayData` constructor value describing
+`chatbot/default` and the existing 13 protected FileManager actions. The
+configuration contains Moodle AJAX URLs with session keys and user-visible
+labels; it does not transfer or persist upload bytes. The caller may include
+a current Moodle session key in the generated endpoint URL, so URLs must
+not be sent to untrusted recipients or included in public logs. The client
+controls when those endpoints are requested.
 
-## Shared global chatbot launcher (18 October 2026)
+The generic `ChatbotconfigSettingsTab` owns the settings form. Shared
+ClientStack owns `GlobalChatbotLauncherFeature` with authenticated-group
+default and stores the chosen window mode and presentation flags as
+`global-chatbot-launcher/default` in the existing BASE3 `ISettingsStore`.
+The Moodle footer hook checks the shared feature before displaying the
+launcher; the generic Moodle AJAX endpoint checks it before loading
+`chatbot/default`. Moodle block/filter chatbots with other identities
+remain independent. Existing feature-audience data is not migrated by this
+release; Moodle's existing group/feature administration remains the owner.
 
-The project module now exposes the `base3moodleglobalchatbotlauncheroutput`
-BASE3 `IOutput`. It renders public configuration attributes for the common
-ClientStack launcher, including the existing `chatbot/default` identity,
-window flags, the standard BASE3 chatbot display URL, and language labels.
-No new service endpoint, file storage backend, AI provider, conversation store
-or recipient is introduced.
+## Identity and authorization
 
-Launcher flags are read from the existing database-backed BASE3 `SettingsStore`
-as `global-chatbot-launcher/default`. A one-time import of previously saved
-native Moodle window flags runs only if this central dataset is absent.
-The launcher feature uses the existing Moodle-owned `ISettingsStore` feature audience overrides under `base3_authorization_features/catalog`; the prior native visibility flags are no longer consulted. ClientStack can store
-mode/size choices in `localStorage` and open-state in `sessionStorage` as
-configured. Actual retention, browser configuration and deployment-level
-notices must be assessed by the Moodle operator. ClientStack provides the
-interaction and keyboard controls; verify theme integration for accessibility.
+`MoodleLabDevelopmentGroup` declares the fixed trusted Moodle login `admin`.
+Additional developer memberships can be managed through the established
+BASE3 group settings, without changing native Moodle site administrator
+status. Full group/feature administration requires both effective
+`development` membership and native Moodle site administration. The
+project does not copy native Moodle roles, credentials, user directories,
+course memberships or permissions into a second database.
 
-## Launcher button appearance (18 October 2026)
+## Storage, deletion and retention
 
-The Moodle launcher no longer passes the site-local chatbot icon to
-ClientStack. Its standard labeled button is rendered instead. This is
-a presentation-only change; identity, access controls, browser storage,
-request destinations and retention remain unchanged.
+The project configuration itself creates no file-storage table or directory.
+`Base3Moodle` owns completed resources in Moodle's native private File API
+area and temporary chunk uploads; see `../Base3Moodle/PRIVACY.md` for the
+specific paths and deletion operations. Moodle database settings and
+launcher flags persist until edited or removed according to the host's
+policy. ClientStack can use browser `localStorage` and `sessionStorage` for
+window modes and reopen behavior, depending on the saved configuration.
+Neither this project module nor the source snapshot specifies log, browser,
+backup or orphan-upload retention periods. Removing a feature override or
+source-defined bootstrap user does not automatically erase database backups.
 
-## Authorization navigation and development bootstrap (19 October 2026)
+## Recipients, transfers, security and accessibility
 
-`Base3MoodleLabSettings` reads the current effective BASE3 groups via
-`IUsermanager` to select the full or reduced site-administration navigation.
-This navigation filtering does not store the evaluated group list. Endpoint
-permissions remain checked separately by the Moodle runtime and the Moodle
-Group/Feature administration displays.
-
-`MoodleLabDevelopmentGroup` may contain exact Moodle login names or complete
-email addresses of trusted maintainers in PHP source. The distributed lists
-are empty by default. Configured identities may appear in repositories,
-build artifacts, deployment copies and backups; maintainers must limit access
-and update deployed source to revoke this fixed membership. Group members
-added through the UI are stored in the host-owned BASE3 settings datasets;
-removing one source of membership does not remove independent OR alternatives.
-An email-domain match is not an automatic administrator grant.
-
-No new independent user database, native Moodle role storage, network
-recipient or cross-border transfer is introduced by the project composition.
-Retention, deletion of backups, native audit trails and user notifications
-remain dependent on the actual Moodle deployment and its configured services.
-The site owner must assess them in its deployment privacy documentation.
-
-## Common authorization administration displays (20 October 2026)
-
-The BASE3 Groups and Features entries in `Base3MoodleLabSettings` now point
-to the unmodified ClientStack `authorizationgroupsdisplay` and
-`authorizationfeaturesdisplay`. The project plugin does not read or persist
-additional user or group information; the Moodle-owned
-`MoodleAudienceAdministrationService` in `Base3Moodle` retains authorization
-and persistence responsibility. See `../Base3Moodle/PRIVACY.md` for the
-existing data categories, retention boundaries, and fallback group behavior.
-No new recipients or cross-border transfers are introduced by this tab change.
-Deployment-level privacy and WCAG 2.2 AA validation is still required.
-
-## Floating global chatbot feature authorization (21 October 2026)
-
-`GlobalChatbotLauncherFeature` defines the `feature/globalchatbotlauncherfeature`
-permission with a default `authenticated` audience. The existing Moodle
-`IAuthorizationService` evaluates the effective BASE3 group/criterion
-expression for the current user before rendering the floating launcher and
-before loading the fixed `chatbot/default` display over AJAX. The native
-Moodle enabled/visibility settings are unused; previously persisted values
-remain in Moodle configuration until removed by the site operator. No new
-storage, identity mapping, external recipient or retention mechanism is added.
-
-The feature's editable audience may contain personal-data selectors already
-supported by BASE3, including user identities, role assignments and criteria.
-These continue to be processed and stored by the existing Moodle authorization
-configuration. Operators remain responsible for authorization audit, data
-subject requests, backup retention and deployment privacy information.
-Embedded chatbots with different configuration identities are unaffected;
-other requests using `chatbot/default` require the same feature permission.
-A deployed Moodle theme and AJAX-denial scenario still require accessibility
-and usability verification.
+This project module introduces no new remote recipient, telemetry backend
+or cross-border transfer. Actual AI model endpoints and other installed
+plugins may process conversation content remotely and must be assessed on
+the deployed Moodle site. Host sessions, Moodle `sesskey`, native role
+capabilities, BASE3 `IAuthorizationService` and the existing protected
+FileManager endpoint govern access. The shared launcher and settings UI
+must be tested with keyboard, screen reader and actual Moodle theme against
+BASE3 WCAG 2.2 AA. This source review is not a deployment legal-compliance
+assertion; operators must determine their own GDPR/ePrivacy and retention
+obligations.
