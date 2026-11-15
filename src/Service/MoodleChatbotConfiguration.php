@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Base3MoodleLab\Service;
+namespace Base3\Base3MoodleLab\Service;
 
-use Base3\LinkTarget\Api\ILinkTargetService;
-use Base3\Translation\Api\ITranslation;
+use Base3\CoreFoundation\LinkTarget\Api\ILinkTargetService;
+use Base3\CoreFoundation\Translation\Api\ITranslation;
 
 /** Owns the Moodle project's chatbot/default display configuration. */
 final class MoodleChatbotConfiguration {

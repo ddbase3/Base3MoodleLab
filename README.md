@@ -23,7 +23,7 @@ renders its standard blue pill button with a text label, as on WordPress.
 
 On first render, any stored legacy Moodle launcher window flags are imported
 into the canonical `global-chatbot-launcher/default` dataset, unless that
-BASE3 dataset already exists. `ClientStack\GlobalChatbotLauncher\GlobalChatbotLauncherFeature` is the single
+BASE3 dataset already exists. `Base3\ClientStack\GlobalChatbotLauncher\GlobalChatbotLauncherFeature` is the single
 feature definition for the floating launcher. Its default audience is the
 BASE3 `authenticated` group; operators can change it under BASE3 > Features.
 The former native Moodle visibility settings are not read anymore. Content

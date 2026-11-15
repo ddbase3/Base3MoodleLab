@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Base3MoodleLab\Test\Support;
+namespace Base3\Base3MoodleLab\Test\Support;
 
-use Base3\Settings\Api\ISettingsStore;
+use Base3\CoreFoundation\Settings\Api\ISettingsStore;
 
 final class SmokeSettingsStore implements ISettingsStore {
 

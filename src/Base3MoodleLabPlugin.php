@@ -1,24 +1,24 @@
 <?php declare(strict_types=1);
 
-namespace Base3MoodleLab;
+namespace Base3\Base3MoodleLab;
 
-use Base3\Accesscontrol\Api\IAccesscontrol;
-use Base3\Api\IBase;
-use Base3\Api\IClassMap;
-use Base3\Api\IContainer;
-use Base3\Api\IModuleRegistry;
-use Base3\Api\IPlugin;
-use Base3\Database\Api\IDatabase;
-use Base3\LinkTarget\Api\ILinkTargetService;
-use Base3\Migration\Api\IMigrationRunner;
-use Base3\Migration\Database\DatabaseMigrationRunner;
-use Base3\Session\Api\ISession;
-use Base3\Settings\Api\ISettingsStore;
-use Base3\Settings\Database\DatabaseSettingsStore;
-use Base3\State\Api\IStateStore;
-use Base3\State\Database\DatabaseStateStore;
-use Base3\Translation\Api\ITranslation;
-use Base3MoodleLab\Service\MoodleChatbotConfiguration;
+use Base3\CoreFoundation\Accesscontrol\Api\IAccesscontrol;
+use Base3\CoreFoundation\Api\IBase;
+use Base3\CoreFoundation\Api\IClassMap;
+use Base3\CoreFoundation\Api\IContainer;
+use Base3\CoreFoundation\Api\IModuleRegistry;
+use Base3\CoreFoundation\Api\IPlugin;
+use Base3\CoreFoundation\Database\Api\IDatabase;
+use Base3\CoreFoundation\LinkTarget\Api\ILinkTargetService;
+use Base3\CoreFoundation\Migration\Api\IMigrationRunner;
+use Base3\Core\Migration\Database\DatabaseMigrationRunner;
+use Base3\CoreFoundation\Session\Api\ISession;
+use Base3\CoreFoundation\Settings\Api\ISettingsStore;
+use Base3\Core\Settings\Database\DatabaseSettingsStore;
+use Base3\CoreFoundation\State\Api\IStateStore;
+use Base3\Core\State\Database\DatabaseStateStore;
+use Base3\CoreFoundation\Translation\Api\ITranslation;
+use Base3\Base3MoodleLab\Service\MoodleChatbotConfiguration;
 
 final class Base3MoodleLabPlugin implements IPlugin, IBase {
 
@@ -39,10 +39,10 @@ final class Base3MoodleLabPlugin implements IPlugin, IBase {
 		// Optional MissionBay composition is a deliberate project-level decision.
 		if ($this->container->get(IModuleRegistry::class)->getModulePath('MissionBay') !== null) {
 			$this->container
-				->set(\AssistantFoundation\Api\IAgentRuntimeSelector::class, fn($c) => new \AssistantRuntime\Service\PreferredAgentRuntimeSelector(
-					$c->get(\AssistantFoundation\Api\IAgentRuntimeRegistry::class), 'missionbay'
+				->set(\Base3\AssistantFoundation\Api\IAgentRuntimeSelector::class, fn($c) => new \Base3\AssistantRuntime\Service\PreferredAgentRuntimeSelector(
+					$c->get(\Base3\AssistantFoundation\Api\IAgentRuntimeRegistry::class), 'missionbay'
 				), IContainer::SHARED)
-				->set(\MissionBay\Api\IAgentKnowledgeService::class, fn($c) => new \MissionBay\Agent\GlobalAgentKnowledgeService(
+				->set(\Base3\MissionBay\Api\IAgentKnowledgeService::class, fn($c) => new \Base3\MissionBay\Agent\GlobalAgentKnowledgeService(
 					$c->get(IDatabase::class), $c->get(IAccesscontrol::class), $c->get(ISession::class)
 				), IContainer::SHARED);
 		}

@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Base3MoodleLab\Group;
+namespace Base3\Base3MoodleLab\Group;
 
-use Base3\Usermanager\Api\IGroup;
-use Base3\Usermanager\Group;
+use Base3\CoreFoundation\Usermanager\Api\IGroup;
+use Base3\CoreFoundation\Usermanager\Group;
 
 /** Optional project-specific, immutable bootstrap membership supplemented by editable criteria. */
 final class MoodleLabDevelopmentGroup implements IGroup {

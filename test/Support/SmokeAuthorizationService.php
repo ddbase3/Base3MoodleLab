@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Base3MoodleLab\Test\Support;
+namespace Base3\Base3MoodleLab\Test\Support;
 
-use Base3\Authorization\Api\IAuthorizationService;
-use Base3\Authorization\Dto\AuthorizationDecision;
-use Base3\Authorization\Dto\AuthorizationRequest;
+use Base3\CoreFoundation\Authorization\Api\IAuthorizationService;
+use Base3\CoreFoundation\Authorization\Dto\AuthorizationDecision;
+use Base3\CoreFoundation\Authorization\Dto\AuthorizationRequest;
 
 final class SmokeAuthorizationService implements IAuthorizationService {
 

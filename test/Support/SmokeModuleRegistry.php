@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Base3MoodleLab\Test\Support;
+namespace Base3\Base3MoodleLab\Test\Support;
 
-use Base3\Api\IModuleRegistry;
+use Base3\CoreFoundation\Api\IModuleRegistry;
 
 final class SmokeModuleRegistry implements IModuleRegistry {
 

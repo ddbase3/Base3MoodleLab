@@ -1,18 +1,18 @@
 <?php declare(strict_types=1);
 
-namespace Base3MoodleLab\Output;
+namespace Base3\Base3MoodleLab\Output;
 
-use Base3\Api\IAssetResolver;
-use Base3\Authorization\Api\IAuthorizationService;
-use Base3\Authorization\Dto\AuthorizationRequest;
-use Base3\Api\IOutput;
-use Base3\LinkTarget\Api\ILinkTargetService;
-use Base3\Settings\Api\ISettingsStore;
-use Base3\Translation\Api\ITranslation;
-use Base3\Usermanager\Permission;
-use ClientStack\GlobalChatbotLauncher\GlobalChatbotLauncherFeature;
-use Base3MoodleLab\Service\MoodleChatbotConfiguration;
-use ClientStack\GlobalChatbotLauncher\GlobalChatbotLauncherSettings;
+use Base3\CoreFoundation\Api\IAssetResolver;
+use Base3\CoreFoundation\Authorization\Api\IAuthorizationService;
+use Base3\CoreFoundation\Authorization\Dto\AuthorizationRequest;
+use Base3\CoreFoundation\Api\IOutput;
+use Base3\CoreFoundation\LinkTarget\Api\ILinkTargetService;
+use Base3\CoreFoundation\Settings\Api\ISettingsStore;
+use Base3\CoreFoundation\Translation\Api\ITranslation;
+use Base3\CoreFoundation\Usermanager\Permission;
+use Base3\ClientStack\GlobalChatbotLauncher\GlobalChatbotLauncherFeature;
+use Base3\Base3MoodleLab\Service\MoodleChatbotConfiguration;
+use Base3\ClientStack\GlobalChatbotLauncher\GlobalChatbotLauncherSettings;
 
 /** Moodle-specific HTML for the platform-independent ClientStack launcher. */
 final class Base3MoodleGlobalChatbotLauncherOutput implements IOutput {

@@ -4,31 +4,30 @@
 
 $root = dirname(__DIR__, 3);
 spl_autoload_register(static function(string $class) use ($root): void {
-	$parts = explode('\\', $class, 2);
-	$module = $parts[0] === 'Base3' ? 'Base3Framework' : $parts[0];
-	$relative = $parts[0] === 'Base3' ? ($parts[1] ?? '') : ($parts[1] ?? '');
-	$file = $root . '/modules/' . $module . '/src/' . str_replace('\\', '/', $relative) . '.php';
+	$parts = explode('\\', ltrim($class, '\\'), 3);
+	if (($parts[0] ?? '') !== 'Base3' || !isset($parts[1], $parts[2])) return;
+	$file = $root . '/modules/' . $parts[1] . '/src/' . str_replace('\\', '/', $parts[2]) . '.php';
 	if (is_file($file)) require_once $file;
 });
 foreach (['SmokeModuleRegistry', 'SmokeLinkTargetService', 'SmokeAssetResolver', 'SmokeAuthorizationService', 'SmokeSettingsStore'] as $fixture) {
 	require_once __DIR__ . '/Support/' . $fixture . '.php';
 }
 
-use Base3\Api\IModuleRegistry;
+use Base3\CoreFoundation\Api\IModuleRegistry;
 use Base3\Core\ServiceLocator;
-use Base3\Translation\Api\ITranslation;
-use Base3\Translation\NoTranslation\NoTranslation;
-use Base3\LinkTarget\Api\ILinkTargetService;
-use Base3MoodleLab\Base3MoodleLabPlugin;
-use Base3MoodleLab\Output\Base3MoodleGlobalChatbotLauncherOutput;
-use Base3MoodleLab\Service\MoodleChatbotConfiguration;
-use Base3MoodleLab\Test\Support\SmokeModuleRegistry;
-use Base3MoodleLab\Test\Support\SmokeLinkTargetService;
-use Base3MoodleLab\Test\Support\SmokeAssetResolver;
-use Base3MoodleLab\Test\Support\SmokeAuthorizationService;
-use Base3MoodleLab\Test\Support\SmokeSettingsStore;
-use ClientStack\GlobalChatbotLauncher\GlobalChatbotLauncherFeature;
-use Chatbot\SettingsTab\ChatbotconfigSettingsTab;
+use Base3\CoreFoundation\Translation\Api\ITranslation;
+use Base3\Core\Translation\NoTranslation\NoTranslation;
+use Base3\CoreFoundation\LinkTarget\Api\ILinkTargetService;
+use Base3\Base3MoodleLab\Base3MoodleLabPlugin;
+use Base3\Base3MoodleLab\Output\Base3MoodleGlobalChatbotLauncherOutput;
+use Base3\Base3MoodleLab\Service\MoodleChatbotConfiguration;
+use Base3\Base3MoodleLab\Test\Support\SmokeModuleRegistry;
+use Base3\Base3MoodleLab\Test\Support\SmokeLinkTargetService;
+use Base3\Base3MoodleLab\Test\Support\SmokeAssetResolver;
+use Base3\Base3MoodleLab\Test\Support\SmokeAuthorizationService;
+use Base3\Base3MoodleLab\Test\Support\SmokeSettingsStore;
+use Base3\ClientStack\GlobalChatbotLauncher\GlobalChatbotLauncherFeature;
+use Base3\Chatbot\SettingsTab\ChatbotconfigSettingsTab;
 
 function verifyMoodleLauncher(bool $check, string $description): void {
 	if (!$check) throw new RuntimeException('FAILED: ' . $description);

@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Base3MoodleLab\Test\Support;
+namespace Base3\Base3MoodleLab\Test\Support;
 
-use Base3\LinkTarget\Api\ILinkTargetService;
+use Base3\CoreFoundation\LinkTarget\Api\ILinkTargetService;
 
 final class SmokeLinkTargetService implements ILinkTargetService {
 
