@@ -1,13 +1,22 @@
 {
-  "manifestVersion": 1,
-  "name": "Base3MoodleLab",
-  "namespace": "Base3\\Base3MoodleLab",
-  "version": "0.3.0",
-  "description": "Project composition and administration tabs for BASE3 in Moodle.",
-  "dependencies": {
-    "Core": ">=4.10.0",
-    "CoreFoundation": ">=4.10.0",
-    "Base3Moodle": ">=0.3.0",
-    "ClientStack": ">=4.23.0"
-  }
+	"manifestVersion": 1,
+	"name": "Base3MoodleLab",
+	"namespace": "Base3\\Base3MoodleLab",
+	"version": "5.0.0",
+	"description": "Project composition and administration tabs for BASE3 in Moodle.",
+	"license": "GPL-3.0-or-later",
+	"maintainers": [
+		{
+			"name": "Daniel Dahme",
+			"url": "https://www.base3.de",
+			"email": "info@base3.de"
+		}
+	],
+	"repository": "https://github.com/ddbase3/Base3MoodleLab",
+	"dependencies": {
+		"Core": ">=5.0.0",
+		"CoreFoundation": ">=5.0.0",
+		"Base3Moodle": ">=5.0.0",
+		"ClientStack": ">=5.0.0"
+	}
 }
